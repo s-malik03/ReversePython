@@ -3,6 +3,26 @@ import socket
 import sys
 import _thread
 
+def ftrans(sck,fname):
+
+	fhandle=open(fname,'rb')
+
+	data=fhandle.read()
+
+	data_len=len(data)
+
+	print("Sending "+str(data_len)+" bytes of data.")
+
+	sck.send(str.encode(fname))
+
+	sck.send(data_len)
+
+	sck.send(data)
+
+	print("Data sent.")
+
+	fhandle.close()
+
 if(len(sys.argv)!=3):
 
 	print("Usage "+sys.argv[0]+" <ip> <port>")
@@ -127,7 +147,7 @@ def passcmd():
 
             c.send(str.encode(enc(cmd)))
 
-            crecv=dec(str(c.recv(1024),"utf-8"))
+            crecv=dec(str(c.recv(2**16),"utf-8"))
 
             print(crecv, end="")
 

