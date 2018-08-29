@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import socket
 import sys
+import time
 import _thread
 
 def ftrans(sck,fname):
@@ -15,7 +16,9 @@ def ftrans(sck,fname):
 
 	sck.send(str.encode(fname))
 
-	sck.send(data_len)
+	sck.send(str.encode(str(data_len)))
+
+	time.sleep(5)
 
 	sck.send(data)
 
@@ -142,12 +145,17 @@ def passcmd():
 
             sys.exit()
 
+        elif cmd[:6]=="ftrans":
+
+            c.send(str.encode(enc("ftrans")))
+
+            ftrans(c,cmd[7:])
 
         elif len(str.encode(cmd))>0:
 
             c.send(str.encode(enc(cmd)))
 
-            crecv=dec(str(c.recv(2**16),"utf-8"))
+            crecv=dec(str(c.recv(2**24),"utf-8"))
 
             print(crecv, end="")
 

