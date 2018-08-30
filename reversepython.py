@@ -16,13 +16,19 @@ def ftrans(sck,fname):
 
 	sck.send(str.encode(fname))
 
+	print(sck.recv(1024))
+
 	sck.send(str.encode(str(data_len)))
+
+	print(sck.recv(1024))
 
 	time.sleep(5)
 
 	sck.send(data)
 
 	print("Data sent.")
+
+	print(sck.recv(1024))
 
 	fhandle.close()
 
@@ -133,6 +139,8 @@ def passcmd():
 
     global c
 
+    global s
+
     while True:
 
         cmd=input()
@@ -142,6 +150,8 @@ def passcmd():
             c.send(str.encode(enc(cmd)))
 
             c.close()
+
+            s.close()
 
             sys.exit()
 
