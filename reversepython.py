@@ -3,6 +3,7 @@ import socket
 import sys
 import time
 import _thread
+import tcpall
 
 def ftrans(sck,fname):
 
@@ -14,17 +15,17 @@ def ftrans(sck,fname):
 
 	print("Sending "+str(data_len)+" bytes of data.")
 
-	sck.send(str.encode(fname))
+	sck.send(str.encode(str(data_len)))
 
 	print(sck.recv(1024))
 
-	sck.send(str.encode(str(data_len)))
+	sck.send(str.encode(fname))
 
 	print(sck.recv(1024))
 
 	time.sleep(5)
 
-	sck.send(data)
+	sck.sendall(data)
 
 	print("Data sent.")
 
@@ -147,7 +148,7 @@ def passcmd():
 
         if cmd=='quit':
 
-            c.send(str.encode(enc(cmd)))
+            tcpall.send_all(c,str.encode(enc(cmd)))
 
             c.close()
 
@@ -157,7 +158,7 @@ def passcmd():
 
         elif cmd[:6]=="ftrans":
 
-            c.send(str.encode(enc("ftrans")))
+            tcpall.send_all(c,str.encode(enc("ftrans")))
 
             ftrans(c,cmd[7:])
 
@@ -165,15 +166,17 @@ def passcmd():
 
             fname=input("File Name:")
 
-            c.send(str.encode(enc(cmd)))
+            tcpall.send_all(c,str.encode(enc(cmd)))
 
-            c.send(str.encode(enc(fname)))
+            tcpall.send_all(c,str.encode(enc(fname)))
+
+            print(tcpall.recv_all(c).decode())
 
         elif len(str.encode(cmd))>0:
 
-            c.send(str.encode(enc(cmd)))
+            tcpall.send_all(c,str.encode(enc(cmd)))
 
-            crecv=dec(str(c.recv(2**24),"utf-8"))
+            crecv=dec(str(tcpall.recv_all(c).decode("utf-8")))
 
             print(crecv, end="")
 

