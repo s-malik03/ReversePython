@@ -66,8 +66,6 @@ def ftrans(sck,fname):
 
         print(sck.recv(1024))
 
-        time.sleep(5)
-
         sck.sendall(data)
 
         print("Data sent.")
