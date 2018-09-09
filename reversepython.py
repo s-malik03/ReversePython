@@ -101,6 +101,12 @@ def passcmd():
 
             sys.exit()
 
+        elif cmd[:5]=="lexec":
+
+            os.system(cmd[6:])
+
+            print(cdir,end="")
+
         elif cmd=="lpwd":
 
             print(os.getcwd())
