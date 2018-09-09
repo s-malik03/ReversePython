@@ -5,7 +5,6 @@ import select
 import time
 import ctypes
 import urllib
-import tcpall
 import _thread
 import RevNet
 

