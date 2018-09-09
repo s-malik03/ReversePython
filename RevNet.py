@@ -56,55 +56,57 @@ def ftrans(sck,fname):
 
         data_len=len(data)
 
-        print("Sending "+str(data_len)+" bytes of data.")
-
         sck.send(str.encode(str(data_len)))
 
-        print(sck.recv(1024))
+        sck.recv(1024)
 
         sck.send(str.encode(fname))
 
-        print(sck.recv(1024))
+        sck.recv(1024)
 
         sck.sendall(data)
 
-        print("Data sent.")
-
-        print(sck.recv(1024))
+        sck.recv(1024)
 
         fhandle.close()
 
     except:
 
-        print("FTRANS ERROR!")
+        pass
 
 def frecv(sck):
 
-    fsize=int(sck.recv(1024).decode())
+    try:
 
-    if(fsize%1024)==0:
+        fsize=int(sck.recv(1024).decode())
 
-        riter=int(fsize/1024)
+        if(fsize%1024)==0:
 
-    else:
+            riter=int(fsize/1024)
 
-        riter=int(fsize/1024)+1
+        else:
 
-    sck.send(str.encode('ack'))
+            riter=int(fsize/1024)+1
 
-    fname=sck.recv(1024).decode()
+        sck.send(str.encode('ack'))
 
-    sck.send(str.encode('ack'))
+        fname=sck.recv(1024).decode()
 
-    fhandle=open(fname,'wb')
+        sck.send(str.encode('ack'))
 
-    for i in range(riter):
+        fhandle=open(fname,'wb')
 
-        fhandle.write(sck.recv(1024))
+        for i in range(riter):
 
-    sck.send(str.encode('ack'))
+            fhandle.write(sck.recv(1024))
 
-    fhandle.close()
+        sck.send(str.encode('ack'))
+
+        fhandle.close()
+
+    except:
+
+        pass
 
 def dec(txt):
 
