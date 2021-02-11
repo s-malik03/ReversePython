@@ -15,10 +15,8 @@ class ClientConn():
 
     def sendstring(self,Str):
 
-        for S in Str:
+        self.Socket.sendall(Str.encode('utf-8'))
 
-            self.Socket.send(S.encode('utf-8'))
-            
         self.Socket.send('^&*!stop(())'.encode('utf-8'))
 
     def sendfile(self,FileName):

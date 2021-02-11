@@ -26,6 +26,9 @@ if __name__=='__main__':
 		if Command=='l_help':
 
 			print("l_help - Print this help message.")
+			print("lls - list contents of local directory")
+			print("lcd - change local directory")
+			print("lexec - execute local command")
 
 		elif Command[0:3]=='lcd':
 
@@ -36,6 +39,10 @@ if __name__=='__main__':
 			for f in os.listdir():
 
 				print(f)
+
+		elif Command[0:5]=='lexec':
+
+			os.system(Command[6:])
 
 		elif Command[0:4]=='fget':
 
