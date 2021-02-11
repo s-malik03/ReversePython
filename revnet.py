@@ -15,7 +15,7 @@ class ClientConn():
 
     def sendstring(self,Str):
 
-        self.Socket.sendall(Str.encode('utf-8'))
+        self.Socket.send(Str.encode('utf-8'))
 
         self.Socket.send('^&*!stop(())'.encode('utf-8'))
 
