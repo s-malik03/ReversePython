@@ -17,8 +17,6 @@ class ClientConn():
 
         self.Socket.send(Str.encode('utf-8'))
 
-        print(Str.encode('utf-8'))
-
         self.Socket.send(b'^&*!stop(())')
 
         self.Socket.recv(1024)
