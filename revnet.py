@@ -33,9 +33,9 @@ class ClientConn():
 
                     break
 
-                self.Socket.send(Data)
+                self.Socket.sendall(Data)
 
-            self.Socket.send(b'^&*!stop(())')
+            self.Socket.sendall(b'^&*!stop(())')
             FileHandler.close()
             return "Successful"
 
@@ -51,7 +51,7 @@ class ClientConn():
 
             Data=self.Socket.recv(1024)
 
-            if Data==b'^&*!stop(())':
+            if b'^&*!stop(())' in Data:
 
                 break
 
@@ -67,7 +67,7 @@ class ClientConn():
 
             Data=self.Socket.recv(1024)
 
-            if Data==b'^&*!stop(())':
+            if b'^&*!stop(())' in Data:
 
                 break
 
