@@ -68,9 +68,7 @@ if __name__=='__main__':
 
 				Ack='Bad'
 			Conn.sendstring(Ack)
-			time.sleep(0.5)
 			Ack=Conn.sendfile(Command[7:])
-			time.sleep(0.5)
 			if Ack=="Unable to open file":
 				print(Ack)
 			else:

