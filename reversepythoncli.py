@@ -9,7 +9,7 @@ import random
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
 	return ''.join(random.choice(chars) for _ in range(size))
 
-Conn=revnet.ClientConn('ec2-15-185-207-141.me-south-1.compute.amazonaws.com',9999)
+Conn=revnet.ClientConn('localhost',9999)
 
 while True:
 
