@@ -17,7 +17,9 @@ class ClientConn():
 
         self.Socket.send(Str.encode('utf-8'))
 
-        self.Socket.send('^&*!stop(())'.encode('utf-8'))
+        print(Str.encode('utf-8'))
+
+        self.Socket.send(b'^&*!stop(())')
 
         self.Socket.recv(1024)
 
@@ -77,6 +79,8 @@ class ClientConn():
                 break
 
             Str=Str+Data.decode('utf-8')
+
+        Str=Str+Data.decode('utf-8').replace('^&*!stop(())','')
 
         self.Socket.send(b'Ack')
 
