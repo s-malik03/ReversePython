@@ -19,6 +19,8 @@ class ClientConn():
 
         self.Socket.send('^&*!stop(())'.encode('utf-8'))
 
+        self.Socket.recv(1024)
+
     def sendfile(self,FileName):
 
         try:
@@ -37,6 +39,8 @@ class ClientConn():
 
             self.Socket.sendall(b'^&*!stop(())')
             FileHandler.close()
+            self.Socket.recv(1024)
+
             return "Successful"
 
         except:
@@ -56,6 +60,7 @@ class ClientConn():
                 break
 
             FileHandler.write(Data)
+        self.Socket.send('Ack')
 
         FileHandler.close()
 
@@ -72,6 +77,8 @@ class ClientConn():
                 break
 
             Str=Str+Data.decode('utf-8')
+
+        self.Socket.send('Ack')
 
         return Str
 
