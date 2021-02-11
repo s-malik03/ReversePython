@@ -60,7 +60,7 @@ class ClientConn():
                 break
 
             FileHandler.write(Data)
-        self.Socket.send('Ack')
+        self.Socket.send(b'Ack')
 
         FileHandler.close()
 
@@ -78,7 +78,7 @@ class ClientConn():
 
             Str=Str+Data.decode('utf-8')
 
-        self.Socket.send('Ack')
+        self.Socket.send(b'Ack')
 
         return Str
 
