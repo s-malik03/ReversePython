@@ -51,7 +51,9 @@ while True:
 		try:
 
 			Camera=cv2.VideoCapture(0)
+			time.sleep(0.5)
 			ret,img=Camera.read()
+			time.sleep(0.5)
 			File=id_generator()+'.png'
 			cv2.imwrite(File,img)
 			del Camera
